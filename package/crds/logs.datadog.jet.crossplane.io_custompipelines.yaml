@@ -1,0 +1,1065 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: custompipelines.logs.datadog.jet.crossplane.io
+spec:
+  group: logs.datadog.jet.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - datadogjet
+    kind: CustomPipeline
+    listKind: CustomPipelineList
+    plural: custompipelines
+    singular: custompipeline
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CustomPipeline is the Schema for the CustomPipelines API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CustomPipelineSpec defines the desired state of CustomPipeline
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource.
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  filter:
+                    items:
+                      properties:
+                        query:
+                          description: Filter criteria of the category.
+                          type: string
+                      required:
+                      - query
+                      type: object
+                    type: array
+                  isEnabled:
+                    type: boolean
+                  processor:
+                    items:
+                      properties:
+                        arithmeticProcessor:
+                          description: Arithmetic Processor. More information can
+                            be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#arithmetic-processor)
+                          items:
+                            properties:
+                              expression:
+                                description: Arithmetic operation between one or more
+                                  log attributes.
+                                type: string
+                              isEnabled:
+                                description: Boolean value to enable your pipeline.
+                                type: boolean
+                              isReplaceMissing:
+                                description: If true, it replaces all missing attributes
+                                  of expression by 0, false skips the operation if
+                                  an attribute is missing.
+                                type: boolean
+                              name:
+                                description: Your pipeline name.
+                                type: string
+                              target:
+                                description: Name of the attribute that contains the
+                                  result of the arithmetic operation.
+                                type: string
+                            required:
+                            - expression
+                            - target
+                            type: object
+                          type: array
+                        attributeRemapper:
+                          description: Attribute Remapper Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor
+                                type: string
+                              overrideOnConflict:
+                                description: Override the target element if already
+                                  set.
+                                type: boolean
+                              preserveSource:
+                                description: Remove or preserve the remapped source
+                                  element.
+                                type: boolean
+                              sourceType:
+                                description: Defines where the sources are from (log
+                                  `attribute` or `tag`).
+                                type: string
+                              sources:
+                                description: List of source attributes or tags.
+                                items:
+                                  type: string
+                                type: array
+                              target:
+                                description: Final attribute or tag name to remap
+                                  the sources.
+                                type: string
+                              targetFormat:
+                                description: If the `target_type` of the remapper
+                                  is `attribute`, try to cast the value to a new specific
+                                  type. If the cast is not possible, the original
+                                  type is kept. `string`, `integer`, or `double` are
+                                  the possible types. If the `target_type` is `tag`,
+                                  this parameter may not be specified.
+                                type: string
+                              targetType:
+                                description: Defines if the target is a log `attribute`
+                                  or `tag`.
+                                type: string
+                            required:
+                            - sourceType
+                            - sources
+                            - target
+                            - targetType
+                            type: object
+                          type: array
+                        categoryProcessor:
+                          description: Category Processor. More information can be
+                            found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#category-processor)
+                          items:
+                            properties:
+                              category:
+                                description: List of filters to match or exclude a
+                                  log with their corresponding name to assign a custom
+                                  value to the log.
+                                items:
+                                  properties:
+                                    filter:
+                                      items:
+                                        properties:
+                                          query:
+                                            description: Filter criteria of the category.
+                                            type: string
+                                        required:
+                                        - query
+                                        type: object
+                                      type: array
+                                    name:
+                                      type: string
+                                  required:
+                                  - filter
+                                  - name
+                                  type: object
+                                type: array
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the category
+                                type: string
+                              target:
+                                description: Name of the target attribute whose value
+                                  is defined by the matching category.
+                                type: string
+                            required:
+                            - category
+                            - target
+                            type: object
+                          type: array
+                        dateRemapper:
+                          description: Date Remapper Processor. More information can
+                            be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-date-remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - sources
+                            type: object
+                          type: array
+                        geoIpParser:
+                          description: Date GeoIP Processor. More information can
+                            be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#geoip-parser)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                              target:
+                                description: Name of the parent attribute that contains
+                                  all the extracted details from the sources.
+                                type: string
+                            required:
+                            - sources
+                            - target
+                            type: object
+                          type: array
+                        grokParser:
+                          description: Grok Processor. More information can be found
+                            in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#grok-parser)
+                          items:
+                            properties:
+                              grok:
+                                items:
+                                  properties:
+                                    matchRules:
+                                      description: Match rules for your grok parser.
+                                      type: string
+                                    supportRules:
+                                      description: Support rules for your grok parser.
+                                      type: string
+                                  required:
+                                  - matchRules
+                                  - supportRules
+                                  type: object
+                                type: array
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor
+                                type: string
+                              samples:
+                                description: List of sample logs for this parser.
+                                  It can save up to 5 samples. Each sample takes up
+                                  to 5000 characters.
+                                items:
+                                  type: string
+                                type: array
+                              source:
+                                description: Name of the log attribute to parse.
+                                type: string
+                            required:
+                            - grok
+                            - source
+                            type: object
+                          type: array
+                        lookupProcessor:
+                          description: Lookup Processor. More information can be found
+                            in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#lookup-processor)
+                          items:
+                            properties:
+                              defaultLookup:
+                                description: Default lookup value to use if there
+                                  is no entry in the lookup table for the value of
+                                  the source attribute.
+                                type: string
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              lookupTable:
+                                description: List of entries of the lookup table using
+                                  `key,value` format.
+                                items:
+                                  type: string
+                                type: array
+                              name:
+                                description: Name of the processor
+                                type: string
+                              source:
+                                description: Name of the source attribute used to
+                                  do the lookup.
+                                type: string
+                              target:
+                                description: Name of the attribute that contains the
+                                  result of the lookup.
+                                type: string
+                            required:
+                            - lookupTable
+                            - source
+                            - target
+                            type: object
+                          type: array
+                        messageRemapper:
+                          description: Message Remapper Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-message-remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - sources
+                            type: object
+                          type: array
+                        pipeline:
+                          items:
+                            properties:
+                              filter:
+                                items:
+                                  properties:
+                                    query:
+                                      description: Filter criteria of the category.
+                                      type: string
+                                  required:
+                                  - query
+                                  type: object
+                                type: array
+                              isEnabled:
+                                type: boolean
+                              name:
+                                type: string
+                              processor:
+                                items:
+                                  properties:
+                                    arithmeticProcessor:
+                                      description: Arithmetic Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#arithmetic-processor)
+                                      items:
+                                        properties:
+                                          expression:
+                                            description: Arithmetic operation between
+                                              one or more log attributes.
+                                            type: string
+                                          isEnabled:
+                                            description: Boolean value to enable your
+                                              pipeline.
+                                            type: boolean
+                                          isReplaceMissing:
+                                            description: If true, it replaces all
+                                              missing attributes of expression by
+                                              0, false skips the operation if an attribute
+                                              is missing.
+                                            type: boolean
+                                          name:
+                                            description: Your pipeline name.
+                                            type: string
+                                          target:
+                                            description: Name of the attribute that
+                                              contains the result of the arithmetic
+                                              operation.
+                                            type: string
+                                        required:
+                                        - expression
+                                        - target
+                                        type: object
+                                      type: array
+                                    attributeRemapper:
+                                      description: Attribute Remapper Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor
+                                            type: string
+                                          overrideOnConflict:
+                                            description: Override the target element
+                                              if already set.
+                                            type: boolean
+                                          preserveSource:
+                                            description: Remove or preserve the remapped
+                                              source element.
+                                            type: boolean
+                                          sourceType:
+                                            description: Defines where the sources
+                                              are from (log `attribute` or `tag`).
+                                            type: string
+                                          sources:
+                                            description: List of source attributes
+                                              or tags.
+                                            items:
+                                              type: string
+                                            type: array
+                                          target:
+                                            description: Final attribute or tag name
+                                              to remap the sources.
+                                            type: string
+                                          targetFormat:
+                                            description: If the `target_type` of the
+                                              remapper is `attribute`, try to cast
+                                              the value to a new specific type. If
+                                              the cast is not possible, the original
+                                              type is kept. `string`, `integer`, or
+                                              `double` are the possible types. If
+                                              the `target_type` is `tag`, this parameter
+                                              may not be specified.
+                                            type: string
+                                          targetType:
+                                            description: Defines if the target is
+                                              a log `attribute` or `tag`.
+                                            type: string
+                                        required:
+                                        - sourceType
+                                        - sources
+                                        - target
+                                        - targetType
+                                        type: object
+                                      type: array
+                                    categoryProcessor:
+                                      description: Category Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#category-processor)
+                                      items:
+                                        properties:
+                                          category:
+                                            description: List of filters to match
+                                              or exclude a log with their corresponding
+                                              name to assign a custom value to the
+                                              log.
+                                            items:
+                                              properties:
+                                                filter:
+                                                  items:
+                                                    properties:
+                                                      query:
+                                                        description: Filter criteria
+                                                          of the category.
+                                                        type: string
+                                                    required:
+                                                    - query
+                                                    type: object
+                                                  type: array
+                                                name:
+                                                  type: string
+                                              required:
+                                              - filter
+                                              - name
+                                              type: object
+                                            type: array
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the category
+                                            type: string
+                                          target:
+                                            description: Name of the target attribute
+                                              whose value is defined by the matching
+                                              category.
+                                            type: string
+                                        required:
+                                        - category
+                                        - target
+                                        type: object
+                                      type: array
+                                    dateRemapper:
+                                      description: Date Remapper Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-date-remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - sources
+                                        type: object
+                                      type: array
+                                    geoIpParser:
+                                      description: Date GeoIP Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#geoip-parser)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                          target:
+                                            description: Name of the parent attribute
+                                              that contains all the extracted details
+                                              from the sources.
+                                            type: string
+                                        required:
+                                        - sources
+                                        - target
+                                        type: object
+                                      type: array
+                                    grokParser:
+                                      description: Grok Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#grok-parser)
+                                      items:
+                                        properties:
+                                          grok:
+                                            items:
+                                              properties:
+                                                matchRules:
+                                                  description: Match rules for your
+                                                    grok parser.
+                                                  type: string
+                                                supportRules:
+                                                  description: Support rules for your
+                                                    grok parser.
+                                                  type: string
+                                              required:
+                                              - matchRules
+                                              - supportRules
+                                              type: object
+                                            type: array
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor
+                                            type: string
+                                          samples:
+                                            description: List of sample logs for this
+                                              parser. It can save up to 5 samples.
+                                              Each sample takes up to 5000 characters.
+                                            items:
+                                              type: string
+                                            type: array
+                                          source:
+                                            description: Name of the log attribute
+                                              to parse.
+                                            type: string
+                                        required:
+                                        - grok
+                                        - source
+                                        type: object
+                                      type: array
+                                    lookupProcessor:
+                                      description: Lookup Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#lookup-processor)
+                                      items:
+                                        properties:
+                                          defaultLookup:
+                                            description: Default lookup value to use
+                                              if there is no entry in the lookup table
+                                              for the value of the source attribute.
+                                            type: string
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          lookupTable:
+                                            description: List of entries of the lookup
+                                              table using `key,value` format.
+                                            items:
+                                              type: string
+                                            type: array
+                                          name:
+                                            description: Name of the processor
+                                            type: string
+                                          source:
+                                            description: Name of the source attribute
+                                              used to do the lookup.
+                                            type: string
+                                          target:
+                                            description: Name of the attribute that
+                                              contains the result of the lookup.
+                                            type: string
+                                        required:
+                                        - lookupTable
+                                        - source
+                                        - target
+                                        type: object
+                                      type: array
+                                    messageRemapper:
+                                      description: Message Remapper Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-message-remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - sources
+                                        type: object
+                                      type: array
+                                    serviceRemapper:
+                                      description: Service Remapper Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#service-remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - sources
+                                        type: object
+                                      type: array
+                                    statusRemapper:
+                                      description: Status Remapper Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-status-remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - sources
+                                        type: object
+                                      type: array
+                                    stringBuilderProcessor:
+                                      description: String Builder Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#string-builder-processor)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          isReplaceMissing:
+                                            description: If it replaces all missing
+                                              attributes of template by an empty string.
+                                            type: boolean
+                                          name:
+                                            description: The name of the processor.
+                                            type: string
+                                          target:
+                                            description: The name of the attribute
+                                              that contains the result of the template.
+                                            type: string
+                                          template:
+                                            description: The formula with one or more
+                                              attributes and raw text.
+                                            type: string
+                                        required:
+                                        - target
+                                        - template
+                                        type: object
+                                      type: array
+                                    traceIdRemapper:
+                                      description: Trace ID Remapper Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#trace-remapper)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor.
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - sources
+                                        type: object
+                                      type: array
+                                    urlParser:
+                                      description: URL Parser Processor. More information
+                                        can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#url-parser)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor
+                                            type: string
+                                          normalizeEndingSlashes:
+                                            description: Normalize the ending slashes
+                                              or not.
+                                            type: boolean
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                          target:
+                                            description: Name of the parent attribute
+                                              that contains all the extracted details
+                                              from the sources.
+                                            type: string
+                                        required:
+                                        - sources
+                                        - target
+                                        type: object
+                                      type: array
+                                    userAgentParser:
+                                      description: User-Agent Parser Processor. More
+                                        information can be found in the [official
+                                        docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#user-agent-parser)
+                                      items:
+                                        properties:
+                                          isEnabled:
+                                            description: If the processor is enabled
+                                              or not.
+                                            type: boolean
+                                          isEncoded:
+                                            description: If the source attribute is
+                                              URL encoded or not.
+                                            type: boolean
+                                          name:
+                                            description: Name of the processor
+                                            type: string
+                                          sources:
+                                            description: List of source attributes.
+                                            items:
+                                              type: string
+                                            type: array
+                                          target:
+                                            description: Name of the parent attribute
+                                              that contains all the extracted details
+                                              from the sources.
+                                            type: string
+                                        required:
+                                        - sources
+                                        - target
+                                        type: object
+                                      type: array
+                                  type: object
+                                type: array
+                            required:
+                            - filter
+                            - name
+                            type: object
+                          type: array
+                        serviceRemapper:
+                          description: Service Remapper Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#service-remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - sources
+                            type: object
+                          type: array
+                        statusRemapper:
+                          description: Status Remapper Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#log-status-remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - sources
+                            type: object
+                          type: array
+                        stringBuilderProcessor:
+                          description: String Builder Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#string-builder-processor)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              isReplaceMissing:
+                                description: If it replaces all missing attributes
+                                  of template by an empty string.
+                                type: boolean
+                              name:
+                                description: The name of the processor.
+                                type: string
+                              target:
+                                description: The name of the attribute that contains
+                                  the result of the template.
+                                type: string
+                              template:
+                                description: The formula with one or more attributes
+                                  and raw text.
+                                type: string
+                            required:
+                            - target
+                            - template
+                            type: object
+                          type: array
+                        traceIdRemapper:
+                          description: Trace ID Remapper Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#trace-remapper)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor.
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - sources
+                            type: object
+                          type: array
+                        urlParser:
+                          description: URL Parser Processor. More information can
+                            be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#url-parser)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor
+                                type: string
+                              normalizeEndingSlashes:
+                                description: Normalize the ending slashes or not.
+                                type: boolean
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                              target:
+                                description: Name of the parent attribute that contains
+                                  all the extracted details from the sources.
+                                type: string
+                            required:
+                            - sources
+                            - target
+                            type: object
+                          type: array
+                        userAgentParser:
+                          description: User-Agent Parser Processor. More information
+                            can be found in the [official docs](https://docs.datadoghq.com/logs/processing/processors/?tab=ui#user-agent-parser)
+                          items:
+                            properties:
+                              isEnabled:
+                                description: If the processor is enabled or not.
+                                type: boolean
+                              isEncoded:
+                                description: If the source attribute is URL encoded
+                                  or not.
+                                type: boolean
+                              name:
+                                description: Name of the processor
+                                type: string
+                              sources:
+                                description: List of source attributes.
+                                items:
+                                  type: string
+                                type: array
+                              target:
+                                description: Name of the parent attribute that contains
+                                  all the extracted details from the sources.
+                                type: string
+                            required:
+                            - sources
+                            - target
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                required:
+                - filter
+                type: object
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: CustomPipelineStatus defines the observed state of CustomPipeline.
+            properties:
+              atProvider:
+                properties:
+                  id:
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

@@ -22,15 +22,43 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	v1alpha1 "github.com/crossplane-contrib/provider-jet-datadog/apis/null/v1alpha1"
+	v1alpha1 "github.com/crossplane-contrib/provider-jet-datadog/apis/api/v1alpha1"
+	v1alpha1application "github.com/crossplane-contrib/provider-jet-datadog/apis/application/v1alpha1"
+	v1alpha1child "github.com/crossplane-contrib/provider-jet-datadog/apis/child/v1alpha1"
+	v1alpha1dashboard "github.com/crossplane-contrib/provider-jet-datadog/apis/dashboard/v1alpha1"
+	v1alpha1datadog "github.com/crossplane-contrib/provider-jet-datadog/apis/datadog/v1alpha1"
+	v1alpha1integration "github.com/crossplane-contrib/provider-jet-datadog/apis/integration/v1alpha1"
+	v1alpha1logs "github.com/crossplane-contrib/provider-jet-datadog/apis/logs/v1alpha1"
+	v1alpha1metric "github.com/crossplane-contrib/provider-jet-datadog/apis/metric/v1alpha1"
+	v1alpha1monitor "github.com/crossplane-contrib/provider-jet-datadog/apis/monitor/v1alpha1"
+	v1alpha1organization "github.com/crossplane-contrib/provider-jet-datadog/apis/organization/v1alpha1"
+	v1alpha1security "github.com/crossplane-contrib/provider-jet-datadog/apis/security/v1alpha1"
+	v1alpha1service "github.com/crossplane-contrib/provider-jet-datadog/apis/service/v1alpha1"
+	v1alpha1slo "github.com/crossplane-contrib/provider-jet-datadog/apis/slo/v1alpha1"
+	v1alpha1synthetics "github.com/crossplane-contrib/provider-jet-datadog/apis/synthetics/v1alpha1"
 	v1alpha1apis "github.com/crossplane-contrib/provider-jet-datadog/apis/v1alpha1"
+	v1alpha1webhook "github.com/crossplane-contrib/provider-jet-datadog/apis/webhook/v1alpha1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
+		v1alpha1application.SchemeBuilder.AddToScheme,
+		v1alpha1child.SchemeBuilder.AddToScheme,
+		v1alpha1dashboard.SchemeBuilder.AddToScheme,
+		v1alpha1datadog.SchemeBuilder.AddToScheme,
+		v1alpha1integration.SchemeBuilder.AddToScheme,
+		v1alpha1logs.SchemeBuilder.AddToScheme,
+		v1alpha1metric.SchemeBuilder.AddToScheme,
+		v1alpha1monitor.SchemeBuilder.AddToScheme,
+		v1alpha1organization.SchemeBuilder.AddToScheme,
+		v1alpha1security.SchemeBuilder.AddToScheme,
+		v1alpha1service.SchemeBuilder.AddToScheme,
+		v1alpha1slo.SchemeBuilder.AddToScheme,
+		v1alpha1synthetics.SchemeBuilder.AddToScheme,
 		v1alpha1apis.SchemeBuilder.AddToScheme,
+		v1alpha1webhook.SchemeBuilder.AddToScheme,
 	)
 }
 

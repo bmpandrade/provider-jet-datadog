@@ -1,0 +1,254 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: archives.logs.datadog.jet.crossplane.io
+spec:
+  group: logs.datadog.jet.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - datadogjet
+    kind: Archive
+    listKind: ArchiveList
+    plural: archives
+    singular: archive
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Archive is the Schema for the Archives API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ArchiveSpec defines the desired state of Archive
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource.
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                properties:
+                  azureArchive:
+                    description: Definition of an azure archive.
+                    items:
+                      properties:
+                        clientId:
+                          description: Your client id.
+                          type: string
+                        container:
+                          description: The container where the archive will be stored.
+                          type: string
+                        path:
+                          description: The path where the archive will be stored.
+                          type: string
+                        storageAccount:
+                          description: The associated storage account.
+                          type: string
+                        tenantId:
+                          description: Your tenant id.
+                          type: string
+                      required:
+                      - clientId
+                      - container
+                      - storageAccount
+                      - tenantId
+                      type: object
+                    type: array
+                  gcsArchive:
+                    description: Definition of a GCS archive.
+                    items:
+                      properties:
+                        bucket:
+                          description: Name of your GCS bucket.
+                          type: string
+                        clientEmail:
+                          description: Your client email.
+                          type: string
+                        path:
+                          description: Path where the archive will be stored.
+                          type: string
+                        projectId:
+                          description: Your project id.
+                          type: string
+                      required:
+                      - bucket
+                      - clientEmail
+                      - path
+                      - projectId
+                      type: object
+                    type: array
+                  includeTags:
+                    description: To store the tags in the archive, set the value `true`.
+                      If it is set to `false`, the tags will be dropped when the logs
+                      are sent to the archive.
+                    type: boolean
+                  query:
+                    description: The archive query/filter. Logs matching this query
+                      are included in the archive.
+                    type: string
+                  rehydrationTags:
+                    description: An array of tags to add to rehydrated logs from an
+                      archive.
+                    items:
+                      type: string
+                    type: array
+                  s3Archive:
+                    description: Definition of an s3 archive.
+                    items:
+                      properties:
+                        accountId:
+                          description: Your AWS account id.
+                          type: string
+                        bucket:
+                          description: Name of your s3 bucket.
+                          type: string
+                        path:
+                          description: Path where the archive will be stored.
+                          type: string
+                        roleName:
+                          description: Your AWS role name
+                          type: string
+                      required:
+                      - accountId
+                      - bucket
+                      - path
+                      - roleName
+                      type: object
+                    type: array
+                required:
+                - query
+                type: object
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: ArchiveStatus defines the observed state of Archive.
+            properties:
+              atProvider:
+                properties:
+                  id:
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
