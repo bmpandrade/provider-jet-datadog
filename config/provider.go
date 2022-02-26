@@ -25,8 +25,8 @@ import (
 )
 
 const (
-	resourcePrefix = "template"
-	modulePath     = "github.com/crossplane-contrib/provider-jet-template"
+	resourcePrefix = "datadog"
+	modulePath     = "github.com/crossplane-contrib/provider-jet-datadog"
 )
 
 //go:embed schema.json

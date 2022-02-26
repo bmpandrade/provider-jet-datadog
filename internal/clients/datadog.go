@@ -27,17 +27,17 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-jet-template/apis/v1alpha1"
+	"github.com/crossplane-contrib/provider-jet-datadog/apis/v1alpha1"
 )
 
 const (
-	keyUsername = "username"
-	keyPassword = "password"
-	keyHost     = "host"
+	keyApiKey = "api_key"
+	keyApiUrl = "api_url"
+	keyAppKey = "app_key"
 
-	// Template credentials environment variable names
-	envUsername = "HASHICUPS_USERNAME"
-	envPassword = "HASHICUPS_PASSWORD"
+	envApiKey = "DD_API_KEY"
+	envApiUrl = "DD_HOST"
+	envAppKey = "DD_APP_KEY"
 )
 
 const (
@@ -48,7 +48,7 @@ const (
 	errGetProviderConfig    = "cannot get referenced ProviderConfig"
 	errTrackUsage           = "cannot track ProviderConfig usage"
 	errExtractCredentials   = "cannot extract credentials"
-	errUnmarshalCredentials = "cannot unmarshal template credentials as JSON"
+	errUnmarshalCredentials = "cannot unmarshal datadog credentials as JSON"
 )
 
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
@@ -81,19 +81,28 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 		if err != nil {
 			return ps, errors.Wrap(err, errExtractCredentials)
 		}
-		templateCreds := map[string]string{}
-		if err := json.Unmarshal(data, &templateCreds); err != nil {
+		datadogCreds := map[string]string{}
+		if err := json.Unmarshal(data, &datadogCreds); err != nil {
 			return ps, errors.Wrap(err, errUnmarshalCredentials)
 		}
 
 		// set provider configuration
-		ps.Configuration = map[string]interface{}{
-			"host": templateCreds[keyHost],
+		ps.Configuration = map[string]interface{}{}
+		if v, ok := datadogCreds[keyApiKey]; ok {
+			ps.Configuration[keyApiKey] = v
 		}
+		if v, ok := datadogCreds[keyApiUrl]; ok {
+			ps.Configuration[keyApiUrl] = v
+		}
+		if v, ok := datadogCreds[keyAppKey]; ok {
+			ps.Configuration[keyAppKey] = v
+		}
+
 		// set environment variables for sensitive provider configuration
 		ps.Env = []string{
-			fmt.Sprintf(fmtEnvVar, envUsername, templateCreds[keyUsername]),
-			fmt.Sprintf(fmtEnvVar, envPassword, templateCreds[keyPassword]),
+			fmt.Sprintf(fmtEnvVar, envApiKey, datadogCreds[keyApiKey]),
+			fmt.Sprintf(fmtEnvVar, envAppKey, datadogCreds[keyAppKey]),
+			fmt.Sprintf(fmtEnvVar, envApiUrl, datadogCreds[keyApiUrl]),
 		}
 		return ps, nil
 	}
